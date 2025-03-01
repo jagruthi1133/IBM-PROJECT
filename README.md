@@ -1,136 +1,133 @@
-# IMPROVING-COLLABORATION-BY-INTEGRATING-MULTIPLE-TOOLS
+# parseurl
 
-where multiple tools are connected in order to maintain collaboration
-and helps in tracking
-Here is your complete `README.md` file. Just copy and paste it into your repository's `README.md` file.
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
+[![Node.js Version][node-image]][node-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-````markdown
-# Improving Collaboration by Integrating Multiple Tools
+Parse a URL with memoization.
 
-## Project Overview
+## Install
 
-This project aims to enhance team collaboration by integrating various development and communication tools into a unified workflow. By streamlining processes and automating tasks, teams can work more efficiently and effectively.
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/). Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-## Features
-
-- **Tool Integration**: Combines multiple platforms to create a seamless workflow.
-- **Automation**: Reduces manual tasks through automated processes.
-- **Scalability**: Designed to grow with your team's needs.
-
-## Prerequisites
-
-Before setting up the project, ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/)
-- [Docker](https://www.docker.com/products/docker-desktop/)
-- [Git](https://git-scm.com/downloads)
-- [AWS CLI](https://aws.amazon.com/cli/)
-- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [eksctl](https://eksctl.io/)
-
-## Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Chethans18/IMPROVING-COLLABORATION-BY-INTEGRATING-MULTIPLE-TOOLS.git
-cd IMPROVING-COLLABORATION-BY-INTEGRATING-MULTIPLE-TOOLS
-```
-````
-
-### 2. Install Dependencies
-
-```bash
-npm install
+```sh
+$ npm install parseurl
 ```
 
-## Running the Application Locally
+## API
 
-To start the application on your local machine:
-
-```bash
-node app.js
+```js
+var parseurl = require('parseurl')
 ```
 
-The application should now be running at `http://localhost:3000/`.
+### parseurl(req)
 
-## Dockerization
+Parse the URL of the given request object (looks at the `req.url` property)
+and return the result. The result is the same as `url.parse` in Node.js core.
+Calling this function multiple times on the same `req` where `req.url` does
+not change will return a cached parsed object, rather than parsing again.
 
-To containerize the application using Docker:
+### parseurl.original(req)
 
-### 1. Build the Docker Image
+Parse the original URL of the given request object and return the result.
+This works by trying to parse `req.originalUrl` if it is a string, otherwise
+parses `req.url`. The result is the same as `url.parse` in Node.js core.
+Calling this function multiple times on the same `req` where `req.originalUrl`
+does not change will return a cached parsed object, rather than parsing again.
 
-```bash
-docker build -t my-node-app .
-```
-
-### 2. Run the Docker Container
-
-```bash
-docker run -p 3000:3000 my-node-app
-```
-
-## Deployment to AWS
-
-To deploy the application on AWS using Elastic Kubernetes Service (EKS):
-
-### 1. Authenticate AWS CLI
+## Benchmark
 
 ```bash
-aws configure
+$ npm run-script bench
+
+> parseurl@1.3.3 bench nodejs-parseurl
+> node benchmark/index.js
+
+  http_parser@2.8.0
+  node@10.6.0
+  v8@6.7.288.46-node.13
+  uv@1.21.0
+  zlib@1.2.11
+  ares@1.14.0
+  modules@64
+  nghttp2@1.32.0
+  napi@3
+  openssl@1.1.0h
+  icu@61.1
+  unicode@10.0
+  cldr@33.0
+  tz@2018c
+
+> node benchmark/fullurl.js
+
+  Parsing URL "http://localhost:8888/foo/bar?user=tj&pet=fluffy"
+
+  4 tests completed.
+
+  fasturl            x 2,207,842 ops/sec ±3.76% (184 runs sampled)
+  nativeurl - legacy x   507,180 ops/sec ±0.82% (191 runs sampled)
+  nativeurl - whatwg x   290,044 ops/sec ±1.96% (189 runs sampled)
+  parseurl           x   488,907 ops/sec ±2.13% (192 runs sampled)
+
+> node benchmark/pathquery.js
+
+  Parsing URL "/foo/bar?user=tj&pet=fluffy"
+
+  4 tests completed.
+
+  fasturl            x 3,812,564 ops/sec ±3.15% (188 runs sampled)
+  nativeurl - legacy x 2,651,631 ops/sec ±1.68% (189 runs sampled)
+  nativeurl - whatwg x   161,837 ops/sec ±2.26% (189 runs sampled)
+  parseurl           x 4,166,338 ops/sec ±2.23% (184 runs sampled)
+
+> node benchmark/samerequest.js
+
+  Parsing URL "/foo/bar?user=tj&pet=fluffy" on same request object
+
+  4 tests completed.
+
+  fasturl            x  3,821,651 ops/sec ±2.42% (185 runs sampled)
+  nativeurl - legacy x  2,651,162 ops/sec ±1.90% (187 runs sampled)
+  nativeurl - whatwg x    175,166 ops/sec ±1.44% (188 runs sampled)
+  parseurl           x 14,912,606 ops/sec ±3.59% (183 runs sampled)
+
+> node benchmark/simplepath.js
+
+  Parsing URL "/foo/bar"
+
+  4 tests completed.
+
+  fasturl            x 12,421,765 ops/sec ±2.04% (191 runs sampled)
+  nativeurl - legacy x  7,546,036 ops/sec ±1.41% (188 runs sampled)
+  nativeurl - whatwg x    198,843 ops/sec ±1.83% (189 runs sampled)
+  parseurl           x 24,244,006 ops/sec ±0.51% (194 runs sampled)
+
+> node benchmark/slash.js
+
+  Parsing URL "/"
+
+  4 tests completed.
+
+  fasturl            x 17,159,456 ops/sec ±3.25% (188 runs sampled)
+  nativeurl - legacy x 11,635,097 ops/sec ±3.79% (184 runs sampled)
+  nativeurl - whatwg x    240,693 ops/sec ±0.83% (189 runs sampled)
+  parseurl           x 42,279,067 ops/sec ±0.55% (190 runs sampled)
 ```
-
-### 2. Create EKS Cluster
-
-```bash
-eksctl create cluster --name my-cluster --region us-east-1 --nodegroup-name my-nodes --node-type t3.micro --nodes 2
-```
-
-### 3. Deploy to Kubernetes
-
-- Apply Kubernetes configurations:
-
-  ```bash
-  kubectl apply -f deployment.yaml
-  ```
-
-- Verify the deployment:
-
-  ```bash
-  kubectl get services
-  ```
-
-## Continuous Integration and Deployment
-
-This project utilizes GitHub Actions for CI/CD. The workflow is defined in `.github/workflows/main.yml` and includes steps for building, testing, and deploying the application.
-
-## Load Testing
-
-To test the deployed application, use Apache Bench:
-
-```bash
-ab -n 1000 -c 100 http://<EKS_LoadBalancer_IP>/
-```
-
-## Contributing
-
-We welcome contributions to enhance this project. To contribute:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature-branch-name`
-3. Make your changes and commit them: `git commit -m 'Add new feature'`
-4. Push to the branch: `git push origin feature-branch-name`
-5. Open a pull request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+  [MIT](LICENSE)
 
-## Acknowledgments
-
-We appreciate the support and contributions from the open-source community.
-
-```
-
-This README file is clear, structured, and includes all the necessary details for users and contributors. Let me know if you need any modifications! 🚀
-```
+[coveralls-image]: https://badgen.net/coveralls/c/github/pillarjs/parseurl/master
+[coveralls-url]: https://coveralls.io/r/pillarjs/parseurl?branch=master
+[node-image]: https://badgen.net/npm/node/parseurl
+[node-url]: https://nodejs.org/en/download
+[npm-downloads-image]: https://badgen.net/npm/dm/parseurl
+[npm-url]: https://npmjs.org/package/parseurl
+[npm-version-image]: https://badgen.net/npm/v/parseurl
+[travis-image]: https://badgen.net/travis/pillarjs/parseurl/master
+[travis-url]: https://travis-ci.org/pillarjs/parseurl
